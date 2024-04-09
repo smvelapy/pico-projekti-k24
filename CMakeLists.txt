@@ -15,15 +15,15 @@ add_compile_options(-Wall
 	)
 
 add_executable(picoapp
-    hello.c
-	# lcd.c
+    main.c
+	# hello.c
 )
 
 # add_subdirectory("keypad-switch")
 # target_include_directories(keypad_switch PUBLIC "keypad-switch")
 # target_link_directories(keypad_switch PUBLIC "keypad-switch")
 
-target_link_libraries(picoapp pico_stdlib)
+target_link_libraries(picoapp pico_stdlib hardware_adc)
 
 # add_subdirectory("grove-lcd-pico")
 # target_include_directories(rgb_lcd PUBLIC "grove-lcd-pico")
