@@ -14,6 +14,7 @@ int main() {
 
     adc_init();
     adc_gpio_init(TEMP_ADC_PIN);
+    adc_select_input(0);
 
 
     // gpio_init(PICO_DEFAULT_LED_PIN);
@@ -23,7 +24,6 @@ int main() {
     // gpio_set_dir(LED_PIN, GPIO_OUT);
     unsigned int uptime = 0;
 
-    adc_select_input(0);
     while(true) {
         // 12-bit conversion, assume max value == ADC_VREF == 3.3 V
         const float conversion_factor = 3.3f / (1 << 12);   //8*10^-4 3.3 / 4096
