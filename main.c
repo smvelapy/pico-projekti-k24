@@ -8,7 +8,15 @@
 // #include "src/calc.h"
 
 #define TEMP_ADC_PIN 26
+#define TEMP_ADC_SELECT 0
+#define POTENT_ADC_PIN 28
+#define POTENT_ADC_SELECT 2
 
+void setup_potentiometer() {
+    adc_init();
+    adc_gpio_init(POTENT_ADC_PIN);
+    // adc_select_input(2);
+}
 int main() {
     stdio_init_all();
 
@@ -18,7 +26,8 @@ int main() {
 
     adc_init();
     adc_gpio_init(TEMP_ADC_PIN);
-    adc_select_input(0);
+    
+    setup_potentiometer();
 
     dht20_setupDHT();
 
@@ -32,6 +41,7 @@ int main() {
 
     float dht_temp, dht_hum;
     while(1) {
+        adc_select_input(TEMP_ADC_SELECT);
         // 12-bit conversion, assume max value == ADC_VREF == 3.3 V
         const float conversion_factor = 3.3f / (1 << 12);   //8*10^-4 3.3 / 4096
         uint16_t result = adc_read(); // 0x430 = 1072
@@ -46,6 +56,11 @@ int main() {
             printf("--- Temperature: %5.2f C°", dht_temp);
             printf("--- Humidity: %5.2f \%RH\n", dht_hum);
         }
+
+        adc_select_input(POTENT_ADC_SELECT);
+        result = adc_read() * 100 / (1 << 12);
+        printf("\nPotent: %d\n",result);
+        
         // printf("Uptime: %d\n", uptime);
         uptime++;
         sleep_ms(4000);
