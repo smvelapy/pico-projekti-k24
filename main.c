@@ -3,7 +3,7 @@
 #include "hardware/adc.h"
 
 #include "dht20_handler.h"
-
+#include "math.h"
 
 // #include "src/calc.h"
 
@@ -12,10 +12,55 @@
 #define POTENT_ADC_PIN 28
 #define POTENT_ADC_SELECT 2
 
+#define READ_STATE_ALL 0
+#define READ_STATE_DHT_ALL 1
+#define READ_STATE_MHT_ONLY 2
+
+// FIX: state should stay in 0-2 range, now goes 3
+
 void setup_potentiometer() {
     adc_init();
     adc_gpio_init(POTENT_ADC_PIN);
     // adc_select_input(2);
+}
+void state1() {
+    float dht_temp, dht_hum;
+
+    adc_select_input(TEMP_ADC_SELECT);
+    // 12-bit conversion, assume max value == ADC_VREF == 3.3 V
+    const float conversion_factor = 3.3f / (1 << 12);   //8*10^-4 3.3 / 4096
+    uint16_t result = adc_read(); // 0x430 = 1072
+    float c_per_mv = 19.5f;
+    float tmp = ((result * conversion_factor) * 1000-400) / c_per_mv;
+    printf("Temp: %f'c Raw value: %d, voltage: %f V\n", tmp, result, result * conversion_factor);
+
+    if (dht20_read(&dht_temp, &dht_hum) != 0) {
+        printf("DHT reading failed.\n");
+    }else {
+        printf("--- DHT Measurements\n");
+        printf("--- Temperature: %5.2f C°", dht_temp);
+        printf("--- Humidity: %5.2f \%RH\n", dht_hum);
+    }
+}
+void state2() {
+    float dht_temp, dht_hum;
+
+    if (dht20_read(&dht_temp, &dht_hum) != 0) {
+        printf("DHT reading failed.\n");
+    }else {
+        printf("--- DHT Measurements\n");
+        printf("--- Temperature: %5.2f C°", dht_temp);
+        printf("--- Humidity: %5.2f \%RH\n", dht_hum);
+    }
+}
+void state3() {
+    adc_select_input(TEMP_ADC_SELECT);
+    // 12-bit conversion, assume max value == ADC_VREF == 3.3 V
+    const float conversion_factor = 3.3f / (1 << 12);   //8*10^-4 3.3 / 4096
+    uint16_t result = adc_read(); // 0x430 = 1072
+    float c_per_mv = 19.5f;
+    float tmp = ((result * conversion_factor) * 1000-400) / c_per_mv;
+    printf("Temp: %f'c Raw value: %d, voltage: %f V\n", tmp, result, result * conversion_factor);
 }
 int main() {
     stdio_init_all();
@@ -39,28 +84,30 @@ int main() {
     // gpio_set_dir(LED_PIN, GPIO_OUT);
     unsigned int uptime = 0;
 
-    float dht_temp, dht_hum;
-    while(1) {
-        adc_select_input(TEMP_ADC_SELECT);
-        // 12-bit conversion, assume max value == ADC_VREF == 3.3 V
-        const float conversion_factor = 3.3f / (1 << 12);   //8*10^-4 3.3 / 4096
-        uint16_t result = adc_read(); // 0x430 = 1072
-        float c_per_mv = 19.5f;
-        float tmp = ((result * conversion_factor) * 1000-400) / c_per_mv;
-        printf("Temp: %f'c Raw value: %d, voltage: %f V\n", tmp, result, result * conversion_factor);
+    uint8_t state = READ_STATE_ALL;
 
-        if (dht20_read(&dht_temp, &dht_hum) != 0) {
-            printf("DHT reading failed.\n");
-        }else {
-            printf("--- DHT Measurements\n");
-            printf("--- Temperature: %5.2f C°", dht_temp);
-            printf("--- Humidity: %5.2f \%RH\n", dht_hum);
-        }
+    
+    while(1) {
+        switch (state) {
+            case READ_STATE_ALL:
+                state1();
+                break;
+            case READ_STATE_DHT_ALL:
+                state2();
+                break;
+            case READ_STATE_MHT_ONLY:
+                state3();
+                break;
+            default:
+                break;
+        }   
 
         adc_select_input(POTENT_ADC_SELECT);
-        result = adc_read() * 100 / (1 << 12);
-        printf("\nPotent: %d\n",result);
-        
+        uint8_t result = adc_read() * 100 / (1 << 12);
+        printf("\nPotentti: %d\n",result);
+
+        state = roundf(((float)result) / 30.0f);
+        printf("State: %d\n", state);
         // printf("Uptime: %d\n", uptime);
         uptime++;
         sleep_ms(4000);
