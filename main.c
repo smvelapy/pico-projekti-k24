@@ -5,6 +5,9 @@
 #include "dht20_handler.h"
 #include "math.h"
 
+#include "web_handler.h"
+#include "cJSON.h"
+
 // #include "src/calc.h"
 
 #define TEMP_ADC_PIN 26
@@ -15,6 +18,8 @@
 #define READ_STATE_ALL 0
 #define READ_STATE_DHT_ALL 1
 #define READ_STATE_MHT_ONLY 2
+
+#define STATE_LED_PIN 18
 
 // FIX: state should stay in 0-2 range, now goes 3
 
@@ -40,6 +45,8 @@ void state1() {
         printf("--- DHT Measurements\n");
         printf("--- Temperature: %5.2f C°", dht_temp);
         printf("--- Humidity: %5.2f \%RH\n", dht_hum);
+
+        webhandler_post_sensordata(dht_temp, dht_hum);
     }
 }
 void state2() {
@@ -62,19 +69,62 @@ void state3() {
     float tmp = ((result * conversion_factor) * 1000-400) / c_per_mv;
     printf("Temp: %f'c Raw value: %d, voltage: %f V\n", tmp, result, result * conversion_factor);
 }
+
+void on_get_settings(char *data, size_t size) {
+    printf("ongetdata\n");
+        // ptr()
+    cJSON *json = cJSON_Parse(data);
+    if (json != NULL) {
+        printf("is json data\n");
+        cJSON *stateCJ = cJSON_GetObjectItemCaseSensitive(json, "ledState");
+        // printf("tmp: %s \n",tmpJ->valuestring);
+        if (cJSON_IsNumber(stateCJ)) {
+            int tmpVal = stateCJ->valueint;
+            printf("led_state: %d", tmpVal);
+
+            gpio_put(STATE_LED_PIN, tmpVal == 1 ? 1 : 0);
+            // gpio_put(CONN_LED_PIN, tmpVal <= 0 ? 0 : 1);
+        }else {
+            printf("not number\n");
+        }
+        cJSON_Delete(json);
+    }
+    json = NULL;
+}
+void loopFiller() {
+    printf("Keep app alive for usb\n");
+    while(1) {
+        tight_loop_contents();
+        // sleep_ms(1000);
+    }
+}
 int main() {
     stdio_init_all();
 
     sleep_ms(4000);
 
-    printf("Hello world\n");
+    printf("Temperature & Humidity sensor\n");
+
+    gpio_init(STATE_LED_PIN);
+    gpio_set_dir(STATE_LED_PIN, GPIO_OUT);
 
     adc_init();
     adc_gpio_init(TEMP_ADC_PIN);
     
     setup_potentiometer();
 
-    dht20_setupDHT();
+    //DHT20 init failed
+    if (dht20_setupDHT() != 0) {
+        loopFiller();
+    }
+
+    if (webhandler_setup() != 0) {
+        // printf("Wifi connection failed")
+        loopFiller();
+    }
+
+    webhandler_getsettings_callback = on_get_settings;
+    webhandler_getsettings();
 
 
     // gpio_init(PICO_DEFAULT_LED_PIN);
@@ -88,6 +138,9 @@ int main() {
 
     
     while(1) {
+        sleep_ms(1000);
+        continue;
+
         switch (state) {
             case READ_STATE_ALL:
                 state1();
@@ -110,6 +163,9 @@ int main() {
         printf("State: %d\n", state);
         // printf("Uptime: %d\n", uptime);
         uptime++;
+
+        webhandler_getsettings();
         sleep_ms(4000);
     }
+    return 0;
 }
