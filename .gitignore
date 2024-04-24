@@ -1,3 +1,4 @@
 build/
 pico-sdk
 dht20-pico
+grove-lcd-pico

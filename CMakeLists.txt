@@ -27,8 +27,9 @@ add_executable(picoapp
 	# test.c
 )
 
-# target_sources(picoapp PRIVATE test.c dht20_handler.c)
-target_sources(picoapp PRIVATE main.c dht20_handler.c web_handler.c cJSON.c)
+# target_sources(picoapp PRIVATE test.c)
+target_sources(picoapp PRIVATE lcd_test.c lcd_handler.c)
+# target_sources(picoapp PRIVATE main.c dht20_handler.c web_handler.c cJSON.c)
 # add_subdirectory("keypad-switch")
 # target_include_directories(keypad_switch PUBLIC "keypad-switch")
 # target_link_directories(keypad_switch PUBLIC "keypad-switch")
@@ -41,8 +42,11 @@ target_link_directories(dht20 PUBLIC "dht20-pico")
 
 # target_link_libraries(picoapp pico_stdlib hardware_adc)
 # target_link_libraries(picoapp pico_stdlib hardware_adc hardware_i2c pico_binary_info dht20)
+add_subdirectory("grove-lcd-pico")
+target_include_directories(rgb_lcd PUBLIC "grove-lcd-pico")
+target_link_directories(rgb_lcd PUBLIC "grove-lcd-pico")
 
-target_link_libraries(picoapp pico_stdlib hardware_adc hardware_i2c pico_binary_info dht20 pico_cyw43_arch_lwip_threadsafe_background pico_lwip_http)
+target_link_libraries(picoapp pico_stdlib hardware_adc hardware_i2c pico_binary_info dht20 pico_cyw43_arch_lwip_threadsafe_background pico_lwip_http rgb_lcd)
 
 # add_subdirectory("grove-lcd-pico")
 # target_include_directories(rgb_lcd PUBLIC "grove-lcd-pico")
