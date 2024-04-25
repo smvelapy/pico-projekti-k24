@@ -6,10 +6,18 @@
 #include "lwip/apps/http_client.h"
 #include "cJSON.h"
 
-#define WIFI_SSID "backup-jako"
-#define WIFI_PASSWORD "99932282"
-#define SERVER_URL "192.168.1.102"
-#define SERVER_PORT 8000
+#ifndef WIFI_SSID 
+#define WIFI_SSID ""
+#endif
+#ifndef WIFI_PASSWORD 
+#define WIFI_PASSWORD ""
+#endif
+#ifndef SERVER_URL 
+#define SERVER_URL ""
+#endif
+#ifndef SERVER_PORT 
+#define SERVER_PORT 0
+#endif
 
 void (*webhandler_getsettings_callback) (char *buffer, size_t size);
 int webhandler_setup()
@@ -97,10 +105,6 @@ void webhandler_getsettings(unsigned char sensor_readed) {
     settings.result_fn = getsettings_result;
     settings.headers_done_fn = getsettings_headers;
 
-    // ip_addr_t ip = IPADDR4_INIT_BYTES(192, 168, 1, 102);
-    // ip_addr_t ip;
-    // IP4_ADDR(&ip, 192, 168, 253, 45);   
-    // IP4_ADDR(&ip, 192, 168, 253, 45); 
     // const ip_addr_t ip;
     // ip.u_addr.ip4 = 22;
     char endpoint_buff[33];
@@ -164,11 +168,6 @@ void webhandler_post_sensordata(unsigned char sensor_type, float temp, float hum
 
     sprintf(endpoint_buff, "/data-post?sensor_type=%d&temp=%.2f&hum=%.2f", sensor_type, temp, hum);
     printf("buff: %s\n", endpoint_buff);
-    // ip_addr_t ip = IPADDR4_INIT_BYTES(192, 168, 1, 102);
-    // ip_addr_t ip;
-    // IP4_ADDR(&ip, 192, 168, 253, 45);   
-    // IP4_ADDR(&ip, 192, 168, 253, 45); 
-    // const ip_addr_t ip;
     // ip.u_addr.ip4 = 22;
     err_t err = httpc_get_file_dns(
         SERVER_URL,

@@ -104,6 +104,7 @@ bool post_data_callback(struct repeating_timer *t) {
 int main() {
     stdio_init_all();
 
+    // If the programm crashes, usb stops working and can't use picotool anymore
     sleep_ms(4000);
 
 

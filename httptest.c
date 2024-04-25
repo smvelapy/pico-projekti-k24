@@ -11,8 +11,8 @@
 #include "lwip/apps/http_client.h"
 #include "cJSON.h"
 
-#define SERVER_URL "192.168.1.102"
-#define SERVER_PORT 8000
+#define SERVER_URL ""
+#define SERVER_PORT 0
 #define RELATIVE_URL "/"
 
 
@@ -125,10 +125,7 @@ void sendGet() {
     settings.result_fn = getdata_result;
     settings.headers_done_fn = getdata_headers;
 
-    ip_addr_t ip = IPADDR4_INIT_BYTES(192, 168, 1, 102);
-    // ip_addr_t ip;
-    // IP4_ADDR(&ip, 192, 168, 253, 45);   
-    // IP4_ADDR(&ip, 192, 168, 253, 45); 
+    ip_addr_t ip = IPADDR4_INIT_BYTES(0, 0, 0, 0);
     // const ip_addr_t ip;
     // ip.u_addr.ip4 = 22;
     err_t err = httpc_get_file(
@@ -151,14 +148,14 @@ void sendGet() {
 }
 
 #ifndef WIFI_SSID
-#define WIFI_SSID "backup-jako"
+#define WIFI_SSID ""
 #endif
 #ifndef WIFI_PASSWORD
-#define WIFI_PASSWORD "99932282"
+#define WIFI_PASSWORD ""
 #endif
 
 #ifndef TEST_DEF
-#define TEST_DEF "not working"
+#define TEST_DEF ""
 #endif
 
 
