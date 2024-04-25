@@ -86,7 +86,7 @@ err_t getsettings_body(void *arg, struct altcp_pcb *conn,
     return ERR_OK;
 }
 
-void webhandler_getsettings() {
+void webhandler_getsettings(unsigned char sensor_readed) {
     static httpc_connection_t settings;
     // if (settingsPtr != NULL) {
     //     printf("SettingsPtr not NULL, skip send\n");
@@ -97,16 +97,18 @@ void webhandler_getsettings() {
     settings.result_fn = getsettings_result;
     settings.headers_done_fn = getsettings_headers;
 
-    ip_addr_t ip = IPADDR4_INIT_BYTES(192, 168, 1, 102);
+    // ip_addr_t ip = IPADDR4_INIT_BYTES(192, 168, 1, 102);
     // ip_addr_t ip;
     // IP4_ADDR(&ip, 192, 168, 253, 45);   
     // IP4_ADDR(&ip, 192, 168, 253, 45); 
     // const ip_addr_t ip;
     // ip.u_addr.ip4 = 22;
-    err_t err = httpc_get_file(
-        &ip,
+    char endpoint_buff[33];
+    sprintf(endpoint_buff, "/settings-get?sensor-mode=%d", sensor_readed);
+    err_t err = httpc_get_file_dns(
+        SERVER_URL,
         SERVER_PORT,
-        "/settings-get",
+        endpoint_buff,
         &settings,
         getsettings_body,
         NULL,
@@ -138,7 +140,7 @@ err_t post_sensordata_body(void *arg, struct altcp_pcb *conn,
     return ERR_OK;
 }
 
-void webhandler_post_sensordata(float temp, float hum)
+void webhandler_post_sensordata(unsigned char sensor_type, float temp, float hum)
 {
     printf("[post_sensordata]\n");
     static httpc_connection_t settings;
@@ -159,7 +161,8 @@ void webhandler_post_sensordata(float temp, float hum)
 
     char endpoint_buff[60];
     // sprintf(endpoint_buff, "/data-post?data={\"temp\":%.2f,\"hum\":%.2f}", temp, hum);
-    sprintf(endpoint_buff, "/data-post?temp=%.2f&hum=%.2f", temp, hum);
+
+    sprintf(endpoint_buff, "/data-post?sensor_type=%d&temp=%.2f&hum=%.2f", sensor_type, temp, hum);
     printf("buff: %s\n", endpoint_buff);
     // ip_addr_t ip = IPADDR4_INIT_BYTES(192, 168, 1, 102);
     // ip_addr_t ip;

@@ -10,12 +10,11 @@
 #include "rgb_lcd.h"
 
 
-#define LCD_SDA_PIN PICO_DEFAULT_I2C_SDA_PIN
-#define LCD_SCL_PIN PICO_DEFAULT_I2C_SCL_PIN
+#define LCD_SDA_PIN 4
+#define LCD_SCL_PIN 5
 
 #define LINE_LENGTH 16
 #define LINES_MAX 2
-
 
 struct Displaystate disp;
 struct Displaystate *disp_ptr = &disp;
@@ -36,7 +35,7 @@ void lcdhandler_init()
     // Set up Grove LCD monitor
     lcd_init(disp_ptr);
     // Use 16 columns, 2 rows
-    lcd_begin(disp_ptr, LINE_LENGTH, 2);
+    lcd_begin(disp_ptr, LINE_LENGTH, LINES_MAX);
     // Initialize cursor to start
     lcd_set_cursor(disp_ptr, 0, 0);
 }

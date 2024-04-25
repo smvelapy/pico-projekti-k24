@@ -28,8 +28,8 @@ add_executable(picoapp
 )
 
 # target_sources(picoapp PRIVATE test.c)
-target_sources(picoapp PRIVATE lcd_test.c lcd_handler.c)
-# target_sources(picoapp PRIVATE main.c dht20_handler.c web_handler.c cJSON.c)
+target_sources(picoapp PRIVATE main.c dht20_handler.c web_handler.c lcd_handler.c cJSON.c)
+# target_sources(picoapp PRIVATE lcd_test.c lcd_handler.c)
 # add_subdirectory("keypad-switch")
 # target_include_directories(keypad_switch PUBLIC "keypad-switch")
 # target_link_directories(keypad_switch PUBLIC "keypad-switch")
